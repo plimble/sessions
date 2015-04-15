@@ -16,6 +16,10 @@ type Sessions struct {
 }
 
 func (s *Sessions) Get(name string) (*Session, error) {
+	if session, ok := s.sessions[name]; ok {
+		return session, nil
+	}
+
 	s.sessions[name] = newSession(name, s.options)
 
 	c, err := s.req.Cookie(name)
