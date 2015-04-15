@@ -24,6 +24,7 @@ func (s *Sessions) Get(name string) (*Session, error) {
 
 	c, err := s.req.Cookie(name)
 	if err != nil {
+		s.sessions[name].ID = generateUUID()
 		s.sessions[name].Values = make(map[string]interface{})
 		return s.sessions[name], err
 	}
@@ -32,10 +33,12 @@ func (s *Sessions) Get(name string) (*Session, error) {
 	defer s.bufPool.Put(buf)
 
 	if err := s.store.Get(c.Value, buf); err != nil {
+		s.sessions[name].ID = generateUUID()
 		s.sessions[name].Values = make(map[string]interface{})
 		return s.sessions[name], err
 	}
 
+	s.sessions[name].ID = c.Value
 	s.sessions[name].DecodeMsg(msgp.NewReader(buf))
 	s.sessions[name].IsNew = false
 
@@ -51,8 +54,6 @@ func (s *Sessions) Save(w http.ResponseWriter) error {
 		if !session.isWriten {
 			continue
 		}
-
-		session.ID = generateUUID()
 
 		b, err = session.MarshalMsg(nil)
 		if err != nil {

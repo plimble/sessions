@@ -16,7 +16,6 @@ type Session struct {
 
 func newSession(name string, options *Options) *Session {
 	return &Session{
-		Values:  make(map[string]interface{}),
 		Options: options,
 		IsNew:   true,
 		name:    name,
