@@ -63,5 +63,8 @@ func (s *SessionManager) GetSessions(r *http.Request) *Sessions {
 }
 
 func (s *SessionManager) Close(sessions *Sessions) {
+	for key := range sessions.sessions {
+		delete(sessions.sessions, key)
+	}
 	s.pool.Put(sessions)
 }
