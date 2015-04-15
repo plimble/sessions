@@ -22,32 +22,32 @@ func (s *Sessions) Get(name string) (*Session, error) {
 
 	s.sessions[name] = newSession(name, s.options)
 
-	c, err := s.req.Cookie(name)
-	if err != nil {
-		s.sessions[name].ID = generateUUID()
-		s.sessions[name].Values = make(map[string]interface{})
-		return s.sessions[name], err
+	var err error
+	var c *http.Cookie
+
+	if c, err = s.req.Cookie(name); err == nil {
+
+		buf := s.bufPool.Get()
+		defer s.bufPool.Put(buf)
+
+		if err = s.store.Get(c.Value, buf); err == nil {
+
+			if err = msgp.Decode(buf, s.sessions[name]); err == nil {
+				s.sessions[name].ID = c.Value
+				s.sessions[name].IsNew = false
+				return s.sessions[name], nil
+			}
+
+		}
 	}
 
-	buf := s.bufPool.Get()
-	defer s.bufPool.Put(buf)
+	s.sessions[name].ID = generateUUID()
+	s.sessions[name].Values = make(map[string]interface{})
 
-	if err := s.store.Get(c.Value, buf); err != nil {
-		s.sessions[name].ID = generateUUID()
-		s.sessions[name].Values = make(map[string]interface{})
-		return s.sessions[name], err
-	}
-
-	s.sessions[name].ID = c.Value
-	s.sessions[name].DecodeMsg(msgp.NewReader(buf))
-	s.sessions[name].IsNew = false
-
-	return s.sessions[name], nil
+	return s.sessions[name], err
 }
 
 func (s *Sessions) Save(w http.ResponseWriter) error {
-	var err error
-	var b []byte
 	buf := s.bufPool.Get()
 	defer s.bufPool.Put(buf)
 	for _, session := range s.sessions {
@@ -55,14 +55,11 @@ func (s *Sessions) Save(w http.ResponseWriter) error {
 			continue
 		}
 
-		b, err = session.MarshalMsg(nil)
-		if err != nil {
+		if err := msgp.Encode(buf, session); err != nil {
 			return err
 		}
 
-		buf.Write(b)
-
-		if err = s.store.Save(session, buf, w); err != nil {
+		if err := s.store.Save(session, buf, w); err != nil {
 			return err
 		}
 
