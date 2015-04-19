@@ -28,7 +28,7 @@ func (t *SessionManagerSuite) TestSession() {
 
 	sessions := t.m.GetSessions(req)
 	session, err := sessions.Get("test")
-	t.Error(err)
+	t.NoError(err)
 
 	session.Set("foo", "abc")
 	session.Set("baz", 123)
@@ -73,7 +73,7 @@ func (t *SessionManagerSuite) TestFlashes() {
 
 	sessions := t.m.GetSessions(req)
 	session, err := sessions.Get("test")
-	t.Error(err)
+	t.NoError(err)
 
 	session.AddFlash("1")
 	session.AddFlash("2")

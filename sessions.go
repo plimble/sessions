@@ -25,20 +25,23 @@ func (s *Sessions) Get(name string) (*Session, error) {
 	var err error
 	var c *http.Cookie
 
-	if c, err = s.req.Cookie(name); err == nil {
+	if c, err = s.req.Cookie(name); err != nil {
+		s.sessions[name].ID = generateUUID()
+		s.sessions[name].Values = make(map[string]interface{})
+		return s.sessions[name], nil
+	}
 
-		buf := s.bufPool.Get()
-		defer s.bufPool.Put(buf)
+	buf := s.bufPool.Get()
+	defer s.bufPool.Put(buf)
 
-		if err = s.store.Get(c.Value, buf); err == nil {
+	if err = s.store.Get(c.Value, buf); err == nil {
 
-			if err = msgp.Decode(buf, s.sessions[name]); err == nil {
-				s.sessions[name].ID = c.Value
-				s.sessions[name].IsNew = false
-				return s.sessions[name], nil
-			}
-
+		if err = msgp.Decode(buf, s.sessions[name]); err == nil {
+			s.sessions[name].ID = c.Value
+			s.sessions[name].IsNew = false
+			return s.sessions[name], nil
 		}
+
 	}
 
 	s.sessions[name].ID = generateUUID()
