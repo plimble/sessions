@@ -1,7 +1,7 @@
 package sessions
 
 import (
-	"github.com/plimble/utils/pool"
+	"github.com/oxtoacart/bpool"
 	"net/http"
 	"sync"
 )
@@ -25,7 +25,7 @@ func (o *Options) mergeDefault() {
 
 type SessionManager struct {
 	pool    sync.Pool
-	bufPool *pool.BufferPool
+	bufPool *bpool.BufferPool
 }
 
 func New(poolSize int, store Store, options *Options) *SessionManager {
@@ -40,7 +40,7 @@ func New(poolSize int, store Store, options *Options) *SessionManager {
 	options.mergeDefault()
 
 	s := &SessionManager{
-		bufPool: pool.NewBufferPool(poolSize),
+		bufPool: bpool.NewBufferPool(poolSize),
 	}
 
 	s.pool.New = func() interface{} {

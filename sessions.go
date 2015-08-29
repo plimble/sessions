@@ -1,7 +1,7 @@
 package sessions
 
 import (
-	"github.com/plimble/utils/pool"
+	"github.com/oxtoacart/bpool"
 	"github.com/tinylib/msgp/msgp"
 
 	"net/http"
@@ -12,7 +12,7 @@ type Sessions struct {
 	store    Store
 	options  *Options
 	sessions map[string]*Session
-	bufPool  *pool.BufferPool
+	bufPool  *bpool.BufferPool
 }
 
 func (s *Sessions) Get(name string) (*Session, error) {

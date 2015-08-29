@@ -3,7 +3,6 @@ package filesystem
 import (
 	"bytes"
 	"github.com/plimble/sessions"
-	"github.com/plimble/utils/strings2"
 	"io"
 	"net/http"
 	"os"
@@ -31,7 +30,7 @@ func (s *FileSystemStore) Get(id string, buf *bytes.Buffer) error {
 	fileMutex.RLock()
 	defer fileMutex.RUnlock()
 
-	f, err := os.OpenFile(filepath.Join(s.path, string2.Concat("session_", id)), os.O_RDONLY, 0755)
+	f, err := os.OpenFile(filepath.Join(s.path, "session_"+id), os.O_RDONLY, 0755)
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func (s *FileSystemStore) Save(session *sessions.Session, buf *bytes.Buffer, w h
 	fileMutex.RLock()
 	defer fileMutex.RUnlock()
 
-	f, err := os.OpenFile(filepath.Join(s.path, string2.Concat("session_", session.ID)), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0755)
+	f, err := os.OpenFile(filepath.Join(s.path, "session_"+session.ID), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0755)
 	if err != nil {
 		return err
 	}
