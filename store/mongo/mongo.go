@@ -25,7 +25,9 @@ func NewMongoStore(session *mgo.Session, db, collection string) *MongoStore {
 func (s *MongoStore) Get(id string, buf *bytes.Buffer) error {
 	data := &SessionData{}
 	if err := s.session.DB(s.db).C(s.collection).FindId(id).One(&data); err != nil {
-		return err
+		if err != mgo.ErrNotFound {
+			return err
+		}
 	}
 
 	if _, err := buf.Write(data.Data); err != nil {
