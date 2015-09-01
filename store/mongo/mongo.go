@@ -35,6 +35,10 @@ func (s *MongoStore) Get(id string, buf *bytes.Buffer) error {
 	return nil
 }
 
+func (s *MongoStore) Delete(id string) error {
+	return s.session.DB(s.db).C(s.collection).RemoveId(id)
+}
+
 func (s *MongoStore) Save(session *sessions.Session, buf *bytes.Buffer, w http.ResponseWriter) error {
 	data := &SessionData{
 		Id:   session.ID,

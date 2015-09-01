@@ -3,11 +3,13 @@ package sessions
 import (
 	"github.com/oxtoacart/bpool"
 	"github.com/tinylib/msgp/msgp"
+	"sync"
 
 	"net/http"
 )
 
 type Sessions struct {
+	sync.RWMutex
 	req      *http.Request
 	store    Store
 	options  *Options
@@ -20,6 +22,8 @@ func (s *Sessions) Get(name string) (*Session, error) {
 		return session, nil
 	}
 
+	s.Lock()
+	defer s.Unlock()
 	s.sessions[name] = newSession(name, s.options)
 
 	var err error
@@ -48,6 +52,24 @@ func (s *Sessions) Get(name string) (*Session, error) {
 	s.sessions[name].Values = make(map[string]interface{})
 
 	return s.sessions[name], err
+}
+
+func (s *Sessions) Delete(name string) error {
+	s.Lock()
+	defer s.Unlock()
+
+	session, ok := s.sessions[name]
+	if !ok {
+		return nil
+	}
+
+	if err := s.store.Delete(session.ID); err != nil {
+		return err
+	}
+
+	delete(s.sessions, name)
+
+	return nil
 }
 
 func (s *Sessions) Save(w http.ResponseWriter) error {

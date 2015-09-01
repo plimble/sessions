@@ -40,9 +40,16 @@ func (s *FileSystemStore) Get(id string, buf *bytes.Buffer) error {
 	return err
 }
 
+func (s *FileSystemStore) Delete(id string) error {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
+	return os.Remove(filepath.Join(s.path, "session_"+id))
+}
+
 func (s *FileSystemStore) Save(session *sessions.Session, buf *bytes.Buffer, w http.ResponseWriter) error {
-	fileMutex.RLock()
-	defer fileMutex.RUnlock()
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
 
 	f, err := os.OpenFile(filepath.Join(s.path, "session_"+session.ID), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0755)
 	if err != nil {

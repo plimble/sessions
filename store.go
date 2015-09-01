@@ -9,6 +9,7 @@ import (
 type Store interface {
 	Get(id string, buf *bytes.Buffer) error
 	Save(session *Session, buf *bytes.Buffer, w http.ResponseWriter) error
+	Delete(id string) error
 }
 
 type MemoryStore struct {
@@ -45,6 +46,14 @@ func (s *MemoryStore) Get(id string, buf *bytes.Buffer) error {
 	_, err := buf.Write(b)
 
 	return err
+}
+
+func (s *MemoryStore) Delete(id string) error {
+	s.Lock()
+	delete(s.data, id)
+	s.Unlock()
+
+	return nil
 }
 
 func (s *MemoryStore) Save(session *Session, buf *bytes.Buffer, w http.ResponseWriter) error {

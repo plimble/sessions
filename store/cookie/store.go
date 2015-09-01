@@ -26,6 +26,10 @@ func (s *CookieStore) Get(id string, buf *bytes.Buffer) error {
 	return nil
 }
 
+func (s *CookieStore) Delete(id string) error {
+	return nil
+}
+
 func (s *CookieStore) Save(session *sessions.Session, buf *bytes.Buffer, w http.ResponseWriter) error {
 	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
 
