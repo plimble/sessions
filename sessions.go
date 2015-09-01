@@ -17,9 +17,9 @@ type Sessions struct {
 	bufPool  *bpool.BufferPool
 }
 
-func (s *Sessions) Get(name string) (*Session, error) {
+func (s *Sessions) Get(name string) *Session {
 	if session, ok := s.sessions[name]; ok {
-		return session, nil
+		return session
 	}
 
 	s.Lock()
@@ -32,7 +32,7 @@ func (s *Sessions) Get(name string) (*Session, error) {
 	if c, err = s.req.Cookie(name); err != nil {
 		s.sessions[name].ID = generateUUID()
 		s.sessions[name].Values = make(map[string]interface{})
-		return s.sessions[name], nil
+		return s.sessions[name]
 	}
 
 	buf := s.bufPool.Get()
@@ -43,7 +43,7 @@ func (s *Sessions) Get(name string) (*Session, error) {
 		if err = msgp.Decode(buf, s.sessions[name]); err == nil {
 			s.sessions[name].ID = c.Value
 			s.sessions[name].IsNew = false
-			return s.sessions[name], nil
+			return s.sessions[name]
 		}
 
 	}
@@ -51,7 +51,7 @@ func (s *Sessions) Get(name string) (*Session, error) {
 	s.sessions[name].ID = generateUUID()
 	s.sessions[name].Values = make(map[string]interface{})
 
-	return s.sessions[name], err
+	return s.sessions[name]
 }
 
 func (s *Sessions) Delete(w http.ResponseWriter) error {
