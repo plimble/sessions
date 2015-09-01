@@ -37,8 +37,14 @@ func (s *MongoStore) Get(id string, buf *bytes.Buffer) error {
 	return nil
 }
 
-func (s *MongoStore) Delete(id string) error {
-	return s.session.DB(s.db).C(s.collection).RemoveId(id)
+func (s *MongoStore) Delete(session *sessions.Session, w http.ResponseWriter) error {
+	if err := s.session.DB(s.db).C(s.collection).RemoveId(session.ID); err != nil {
+		return err
+	}
+
+	session.Options.MaxAge = -1
+	http.SetCookie(w, sessions.NewCookie(session.Name(), session.ID, session.Options))
+	return nil
 }
 
 func (s *MongoStore) Save(session *sessions.Session, buf *bytes.Buffer, w http.ResponseWriter) error {

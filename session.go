@@ -1,5 +1,11 @@
 package sessions
 
+import (
+	"github.com/oxtoacart/bpool"
+	"github.com/tinylib/msgp/msgp"
+	"net/http"
+)
+
 //go:generate msgp
 
 // Default flashes key.
@@ -12,13 +18,17 @@ type Session struct {
 	IsNew    bool                   `msg:"-"`
 	name     string                 `msg:"-"`
 	isWriten bool                   `msg:"-"`
+	store    Store                  `msg:"-"`
+	bufPool  *bpool.BufferPool      `msg:"-"`
 }
 
-func newSession(name string, options *Options) *Session {
+func newSession(name string, options *Options, store Store, bufPool *bpool.BufferPool) *Session {
 	return &Session{
 		Options: options,
 		IsNew:   true,
 		name:    name,
+		store:   store,
+		bufPool: bufPool,
 	}
 }
 
@@ -167,4 +177,26 @@ func (s *Session) AddFlashs(values []string) {
 	}
 
 	s.isWriten = true
+}
+
+func (s *Session) Delete(w http.ResponseWriter) error {
+	return s.store.Delete(s, w)
+}
+
+func (s *Session) Save(w http.ResponseWriter) error {
+	buf := s.bufPool.Get()
+	defer s.bufPool.Put(buf)
+	if !s.isWriten {
+		return nil
+	}
+
+	if err := msgp.Encode(buf, s); err != nil {
+		return err
+	}
+
+	if err := s.store.Save(s, buf, w); err != nil {
+		return err
+	}
+
+	return s.store.Save(s, buf, w)
 }

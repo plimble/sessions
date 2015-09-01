@@ -24,7 +24,7 @@ func (s *Sessions) Get(name string) (*Session, error) {
 
 	s.Lock()
 	defer s.Unlock()
-	s.sessions[name] = newSession(name, s.options)
+	s.sessions[name] = newSession(name, s.options, s.store, s.bufPool)
 
 	var err error
 	var c *http.Cookie
@@ -54,20 +54,15 @@ func (s *Sessions) Get(name string) (*Session, error) {
 	return s.sessions[name], err
 }
 
-func (s *Sessions) Delete(name string) error {
+func (s *Sessions) Delete(w http.ResponseWriter) error {
 	s.Lock()
 	defer s.Unlock()
 
-	session, ok := s.sessions[name]
-	if !ok {
-		return nil
+	for _, session := range s.sessions {
+		if err := s.store.Delete(session, w); err != nil {
+			return err
+		}
 	}
-
-	if err := s.store.Delete(session.ID); err != nil {
-		return err
-	}
-
-	delete(s.sessions, name)
 
 	return nil
 }

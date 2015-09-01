@@ -9,7 +9,7 @@ import (
 type Store interface {
 	Get(id string, buf *bytes.Buffer) error
 	Save(session *Session, buf *bytes.Buffer, w http.ResponseWriter) error
-	Delete(id string) error
+	Delete(session *Session, w http.ResponseWriter) error
 }
 
 type MemoryStore struct {

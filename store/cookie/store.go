@@ -26,7 +26,9 @@ func (s *CookieStore) Get(id string, buf *bytes.Buffer) error {
 	return nil
 }
 
-func (s *CookieStore) Delete(id string) error {
+func (s *CookieStore) Delete(session *sessions.Session, w http.ResponseWriter) error {
+	session.Options.MaxAge = -1
+	http.SetCookie(w, sessions.NewCookie(session.Name(), session.ID, session.Options))
 	return nil
 }
 

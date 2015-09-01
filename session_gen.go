@@ -63,13 +63,11 @@ func (z *Session) DecodeMsg(dc *msgp.Reader) (err error) {
 
 // EncodeMsg implements msgp.Encodable
 func (z *Session) EncodeMsg(en *msgp.Writer) (err error) {
-	err = en.WriteMapHeader(1)
+	// map header, size 1
+	// write "v"
+	err = en.Append(0x81, 0xa1, 0x76)
 	if err != nil {
-		return
-	}
-	err = en.WriteString("v")
-	if err != nil {
-		return
+		return err
 	}
 	err = en.WriteMapHeader(uint32(len(z.Values)))
 	if err != nil {
@@ -91,8 +89,9 @@ func (z *Session) EncodeMsg(en *msgp.Writer) (err error) {
 // MarshalMsg implements msgp.Marshaler
 func (z *Session) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.Require(b, z.Msgsize())
-	o = msgp.AppendMapHeader(o, 1)
-	o = msgp.AppendString(o, "v")
+	// map header, size 1
+	// string "v"
+	o = append(o, 0x81, 0xa1, 0x76)
 	o = msgp.AppendMapHeader(o, uint32(len(z.Values)))
 	for xvk, bzg := range z.Values {
 		o = msgp.AppendString(o, xvk)
@@ -159,7 +158,7 @@ func (z *Session) UnmarshalMsg(bts []byte) (o []byte, err error) {
 }
 
 func (z *Session) Msgsize() (s int) {
-	s = msgp.MapHeaderSize + msgp.StringPrefixSize + 1 + msgp.MapHeaderSize
+	s = 1 + 2 + msgp.MapHeaderSize
 	if z.Values != nil {
 		for xvk, bzg := range z.Values {
 			_ = bzg

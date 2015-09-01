@@ -1,4 +1,4 @@
-package sessions 
+package sessions
 
 // NOTE: THIS FILE WAS PRODUCED BY THE
 // MSGP CODE GENERATION TOOL (github.com/tinylib/msgp)
@@ -6,11 +6,12 @@ package sessions
 
 import (
 	"bytes"
-	"github.com/tinylib/msgp/msgp"
 	"testing"
+
+	"github.com/tinylib/msgp/msgp"
 )
 
-func TestSessionMarshalUnmarshal(t *testing.T) {
+func TestMarshalUnmarshalSession(t *testing.T) {
 	v := Session{}
 	bts, err := v.MarshalMsg(nil)
 	if err != nil {
@@ -33,34 +34,34 @@ func TestSessionMarshalUnmarshal(t *testing.T) {
 	}
 }
 
-func BenchmarkSessionMarshalMsg(b *testing.B) {
+func BenchmarkMarshalMsgSession(b *testing.B) {
 	v := Session{}
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		v.MarshalMsg(nil)
 	}
 }
 
-func BenchmarkSessionAppendMsg(b *testing.B) {
+func BenchmarkAppendMsgSession(b *testing.B) {
 	v := Session{}
 	bts := make([]byte, 0, v.Msgsize())
 	bts, _ = v.MarshalMsg(bts[0:0])
 	b.SetBytes(int64(len(bts)))
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		bts, _ = v.MarshalMsg(bts[0:0])
 	}
 }
 
-func BenchmarkSessionUnmarshal(b *testing.B) {
+func BenchmarkUnmarshalSession(b *testing.B) {
 	v := Session{}
 	bts, _ := v.MarshalMsg(nil)
 	b.ReportAllocs()
 	b.SetBytes(int64(len(bts)))
 	b.ResetTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		_, err := v.UnmarshalMsg(bts)
 		if err != nil {
 			b.Fatal(err)
@@ -68,7 +69,7 @@ func BenchmarkSessionUnmarshal(b *testing.B) {
 	}
 }
 
-func TestSessionEncodeDecode(t *testing.T) {
+func TestEncodeDecodeSession(t *testing.T) {
 	v := Session{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
@@ -92,21 +93,21 @@ func TestSessionEncodeDecode(t *testing.T) {
 	}
 }
 
-func BenchmarkSessionEncode(b *testing.B) {
+func BenchmarkEncodeSession(b *testing.B) {
 	v := Session{}
-	var buf bytes.Buffer 
+	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
 	b.SetBytes(int64(buf.Len()))
 	en := msgp.NewWriter(msgp.Nowhere)
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		v.EncodeMsg(en)
 	}
 	en.Flush()
 }
 
-func BenchmarkSessionDecode(b *testing.B) {
+func BenchmarkDecodeSession(b *testing.B) {
 	v := Session{}
 	var buf bytes.Buffer
 	msgp.Encode(&buf, &v)
@@ -115,11 +116,10 @@ func BenchmarkSessionDecode(b *testing.B) {
 	dc := msgp.NewReader(rd)
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		err := v.DecodeMsg(dc)
-		if  err != nil {
+		if err != nil {
 			b.Fatal(err)
 		}
 	}
 }
-

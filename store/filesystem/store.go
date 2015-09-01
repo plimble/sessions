@@ -40,11 +40,17 @@ func (s *FileSystemStore) Get(id string, buf *bytes.Buffer) error {
 	return err
 }
 
-func (s *FileSystemStore) Delete(id string) error {
+func (s *FileSystemStore) Delete(session *sessions.Session, w http.ResponseWriter) error {
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
-	return os.Remove(filepath.Join(s.path, "session_"+id))
+	if err := os.Remove(filepath.Join(s.path, "session_"+id)); err != nil {
+		return err
+	}
+
+	session.Options.MaxAge = -1
+	http.SetCookie(w, sessions.NewCookie(session.Name(), session.ID, session.Options))
+	return nil
 }
 
 func (s *FileSystemStore) Save(session *sessions.Session, buf *bytes.Buffer, w http.ResponseWriter) error {
