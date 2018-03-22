@@ -28,6 +28,6 @@ func NewCookie(name, value string, options *Options) *http.Cookie {
 }
 
 func generateUUID() string {
-	v1 := uuid.NewV1()
+	v1 := uuid.Must(uuid.NewV1())
 	return hex.EncodeToString(v1.Bytes())
 }
